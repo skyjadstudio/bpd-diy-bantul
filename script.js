@@ -433,11 +433,7 @@ async function probeVideo(src) {
   }
 }
 async function findVideo(basePath) {
-  const candidates = [
-    'video.mp4', 'video.MP4', 'video.mov', 'video.MOV', 'video.webm',
-    '1.mp4', '1.MP4', '1.mov', '1.MOV',
-    '2.mp4', '2.MP4', '2.mov', '2.MOV'
-  ];
+  const candidates = ['1.mp4', 'video.mp4', '1.mov', 'video.mov', '2.mp4'];
   for (const name of candidates) {
     const res = await probeVideo(`${basePath}/${name}`);
     if (res) return res;
@@ -450,6 +446,7 @@ document.querySelectorAll('.pcard').forEach(async card => {
   const p = PROGRAMS[i];
   if (!p) return;
   const vSrc = await findVideo(`${BASE}${p.f}`);
+  card.dataset.videoChecked = '1';
   if (vSrc) {
     card.dataset.video = vSrc;
     const ph = card.querySelector('.ph');
@@ -463,55 +460,64 @@ document.querySelectorAll('.pcard').forEach(async card => {
 });
 
 async function findImage(basePath, n) {
-  const exts = ['.png', '.jpeg', '.jpg', '.JPG', '.JPEG', '.PNG', '.gif', '.GIF'];
+  const exts = ['.jpg', '.jpeg', '.JPG', '.png', '.gif', '.JPEG', '.PNG'];
   for (const ext of exts) {
-    const res = await probe(`${basePath}/${n}${ext}`);
+    const res = await probeVideo(`${basePath}/${n}${ext}`);
     if (res) return res;
   }
   return null;
 }
 async function openBox(i) {
   const p = PROGRAMS[i];
+  const card = rail.querySelector(`.pcard[data-i="${i}"]`);
   document.getElementById('lbYear').textContent = p.y;
   document.getElementById('lbTitle').textContent = p.t;
   document.getElementById('lbDesc').textContent = p.d;
   box.hidden = false;
   document.body.style.overflow = 'hidden';
   photos = []; pi = 0;
-  show();
 
-  // Check if this program folder has a video file first
-  const videoSrc = await findVideo(`${BASE}${p.f}`);
+  // 1. Instant video check (use cached card.dataset.video if already checked)
+  let videoSrc = card?.dataset.video || null;
+  if (!videoSrc && !card?.dataset.videoChecked) {
+    videoSrc = await findVideo(`${BASE}${p.f}`);
+  }
   if (videoSrc) {
     photos.push({ type: 'video', src: videoSrc, y: p.y, t: p.t, d: p.d });
     show();
     return;
   }
 
-  for (let n = 1; n <= 12; n++) {
+  // 2. Instant first photo from the already-loaded card thumbnail
+  const thumbImg = card?.querySelector('.ph img');
+  if (thumbImg && thumbImg.getAttribute('src')) {
+    photos.push(thumbImg.getAttribute('src'));
+    show();
+  } else {
+    show();
+  }
+
+  // 3. Check if there are additional photos (2, 3...) in the background
+  const startN = photos.length ? 2 : 1;
+  for (let n = startN; n <= 12; n++) {
     const validSrc = await findImage(`${BASE}${p.f}`, n);
     if (!validSrc) break;
     photos.push(validSrc);
-    if (n === 1) show();
+    if (photos.length === 1) show();
     else updateCount();
   }
   show();
 }
-async function openProfileBox(startIndex = 0) {
+function openProfileBox(startIndex = 0) {
   document.getElementById('lbYear').textContent = 'APSAI & BPD DIY';
   document.getElementById('lbTitle').textContent = 'Fendy Muryawan — Sinergi Sahabat Anak';
   document.getElementById('lbDesc').textContent = 'Dokumentasi kontribusi kepemimpinan Bank BPD DIY Cabang Bantul bersama APSAI Kabupaten Bantul.';
+  photos = [...document.querySelectorAll('#profileGallery .pg-item img')]
+    .map(img => img.getAttribute('src'))
+    .filter(Boolean);
+  pi = Math.min(startIndex, Math.max(0, photos.length - 1));
   box.hidden = false;
   document.body.style.overflow = 'hidden';
-  photos = []; pi = 0;
-  show();
-  for (let n = 2; n <= 12; n++) {
-    const validSrc = await findImage('assets/foto/00-profil-pak-fendy', n);
-    if (validSrc) photos.push(validSrc);
-  }
-  if (photos.length > 0) {
-    pi = Math.min(startIndex, photos.length - 1);
-  }
   show();
 }
 function openFacilityBox(startIndex = 0) {
