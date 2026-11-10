@@ -207,7 +207,10 @@ blockquote{margin-top:1.8rem;padding-left:1.2rem;border-left:3px solid var(--pea
 .ph span{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.75)}
 .ph img,.ph video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
 .ph.portrait{
-  aspect-ratio: 1 / 1.02;
+  aspect-ratio: 3 / 4.55;
+  max-width: 430px;
+  width: 100%;
+  justify-self: center;
   border-radius: 36px;
   border: 1px solid rgba(255,255,255,.45);
   box-shadow: 0 40px 70px -30px rgba(5,20,90,.6);
@@ -223,12 +226,11 @@ blockquote{margin-top:1.8rem;padding-left:1.2rem;border-left:3px solid var(--pea
   opacity: 0;
 }
 .ph.portrait img{
-  object-fit: contain;
+  object-fit: cover;
   object-position: center bottom;
-  transform: translate3d(var(--px, 0px), var(--py, 0px), 0) scale(1.045);
-  transform-origin: center bottom;
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0) scale(1.035);
+  transform-origin: center center;
   transition: transform 0.25s ease-out;
-  filter: drop-shadow(0 12px 24px rgba(5,15,60,.35));
 }
 
 /* ---------- Bento ---------- */
@@ -368,7 +370,7 @@ footer img{height:34px}
 /* ---------- Responsive ---------- */
 @media(max-width:900px){
   .profile{grid-template-columns:1fr;gap:2rem}
-  .ph.portrait{aspect-ratio:1 / 1.02;max-width:380px;width:100%;margin:0 auto}
+  .ph.portrait{aspect-ratio:3 / 4.55;max-width:340px;width:100%;margin:0 auto}
   .profile-gallery{grid-template-columns:repeat(3,1fr);gap:.75rem}
   .bento{grid-template-columns:1fr 1fr;grid-auto-rows:240px}
   .bento .a{grid-column:span 2;grid-row:span 2}
